@@ -1,0 +1,33 @@
+{
+  "slug": "example-article",
+  "title": "A Quiet Reminder That Hope Is Still Near",
+  "description": "A Christian reflection about hope, prayer, and trusting Jesus in difficult seasons.",
+  "category": "Inspiring Stories",
+  "date": "2026-09-04",
+  "read_time": "4 min read",
+  "cover_image": "images/articles/example-article/photo-1-cover.jpg",
+  "cover_alt": "Golden morning light over a peaceful mountain landscape.",
+  "dek": "When life feels uncertain, faith can remind us that we are not walking alone.",
+  "sections": [
+    {
+      "heading": "Hope can begin with one quiet moment",
+      "paragraphs": [
+        "Some days begin with questions we cannot answer. We may not know what tomorrow will bring, but we can choose where to place our trust today.",
+        "Prayer gives us a quiet place to bring our fears before God and remember that Jesus remains near."
+      ],
+      "image": {
+        "src": "images/articles/example-article/photo-2-article.png",
+        "alt": "A person praying beside an open Bible in warm morning light.",
+        "caption": "Faith gives us a quiet place to begin again."
+      }
+    }
+  ],
+  "verse": {
+    "text": "Peace I leave with you; my peace I give you.",
+    "reference": "John 14:27"
+  },
+  "closing": [
+    "Faith does not promise an easy road. It gives us a reason to keep walking it.",
+    "Take a moment today to pray and place your next step in God's hands."
+  ]
+}

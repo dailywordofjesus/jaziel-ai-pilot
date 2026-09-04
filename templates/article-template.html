@@ -1,0 +1,20 @@
+<!-- Master article template.
+The Pilot generates a complete article from this structure.
+Keep shared visual styles in the main Jaziel repository. -->
+<article class="article-layout container">
+  <div class="article-main">
+    <header class="article-header">
+      <p class="eyebrow">{{CATEGORY}}</p>
+      <h1>{{TITLE}}</h1>
+      <p class="article-dek">{{DESCRIPTION}}</p>
+      <div class="article-meta">{{DATE}} <span>•</span> {{READ_TIME}}</div>
+    </header>
+    <figure class="article-cover">
+      <img class="article-photo" src="{{COVER_IMAGE}}" alt="{{IMAGE_ALT}}" width="1200" height="630">
+      <figcaption>{{CAPTION}}</figcaption>
+    </figure>
+    <div class="article-body">
+      {{BODY}}
+    </div>
+  </div>
+</article>

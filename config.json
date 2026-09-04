@@ -1,0 +1,9 @@
+{
+  "site_name": "Jaziel",
+  "tagline": "Faith \u2022 Hope \u2022 Jesus",
+  "pilot_name": "Jaziel AI Pilot",
+  "default_language": "en",
+  "output_format": "html",
+  "article_root": "../JAZIEL-main",
+  "notes": "Keep API keys and private credentials out of this repository."
+}

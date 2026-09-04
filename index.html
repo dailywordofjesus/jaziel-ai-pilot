@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jaziel AI Pilot</title>
+<meta name="description" content="Jaziel AI Pilot — article planning and generation workspace.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span>✦</span><div><strong>JAZIEL</strong><small>AI PILOT</small></div></div>
+  <div class="status"><i></i> Local workspace</div>
+</header>
+
+<main class="shell">
+  <section class="intro">
+    <p class="eyebrow">CONTENT CONTROL CENTER</p>
+    <h1>Build the next Jaziel story.</h1>
+    <p>Create an article brief, prepare SEO/OG data, and export a ready-to-upload HTML article.</p>
+  </section>
+
+  <section class="workspace">
+    <div class="panel">
+      <div class="panel-head"><h2>Article brief</h2><span>STEP 1</span></div>
+      <form id="articleForm">
+        <label>Title<input id="title" required placeholder="Finding Hope When Life Feels Impossible"></label>
+        <div class="two">
+          <label>Category
+            <select id="category">
+              <option>Inspiring Stories</option>
+              <option>Bible & Faith</option>
+              <option>Daily Devotional</option>
+              <option>Prayer</option>
+              <option>Christian Life</option>
+            </select>
+          </label>
+          <label>Read time<input id="readTime" value="5 min read"></label>
+        </div>
+        <label>Short description<textarea id="dek" rows="3" placeholder="A short description for the article and social sharing."></textarea></label>
+        <label>Cover image path<input id="cover" value="images/articles/your-article/photo-1-cover.jpg"></label>
+        <label>Article body
+          <textarea id="body" rows="12" placeholder="Write or paste the article body here. Separate paragraphs with a blank line."></textarea>
+        </label>
+        <div class="actions">
+          <button type="button" class="secondary" id="sampleBtn">Load sample</button>
+          <button type="submit">Build article →</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel preview-panel">
+      <div class="panel-head"><h2>Output</h2><span>STEP 2</span></div>
+      <div id="empty" class="empty">
+        <div>✦</div>
+        <h3>No article generated yet</h3>
+        <p>Fill in the brief and click <b>Build article</b>.</p>
+      </div>
+      <div id="result" hidden>
+        <div class="result-box">
+          <div><b id="resultTitle"></b><small id="resultMeta"></small></div>
+          <span class="ready">READY</span>
+        </div>
+        <label>Generated HTML<textarea id="output" rows="17" readonly></textarea></label>
+        <div class="actions">
+          <button class="secondary" id="copyBtn">Copy HTML</button>
+          <button id="downloadBtn">Download HTML</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="roadmap">
+    <div><p class="eyebrow">PILOT ROADMAP</p><h2>Built for the Jaziel workflow</h2></div>
+    <div class="roadmap-grid">
+      <article><b>01 · Plan</b><h3>Article brief</h3><p>Title, category, description, images and body.</p></article>
+      <article><b>02 · Prepare</b><h3>SEO package</h3><p>Meta title, description and Open Graph image are prepared automatically.</p></article>
+      <article><b>03 · Export</b><h3>Upload-ready HTML</h3><p>Download the finished article and place it in the Jaziel repository.</p></article>
+    </div>
+  </section>
+</main>
+
+<footer>Jaziel AI Pilot · Internal content workspace</footer>
+<script src="scripts/app.js"></script>
+</body>
+</html>
