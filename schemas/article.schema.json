@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jaziel.ai/schema/article-v1.json",
+  "title": "Jaziel Article Schema v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "slug",
+    "description",
+    "category",
+    "date",
+    "read_time",
+    "dek",
+    "cover",
+    "intro",
+    "sections",
+    "bible_verse",
+    "closing",
+    "seo",
+    "og",
+    "tags",
+    "related_articles"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "bible-faith",
+        "daily-devotional",
+        "inspiring-stories",
+        "prayer",
+        "christian-life"
+      ]
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "read_time": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]* min read$"
+    },
+    "dek": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cover": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "src",
+        "alt"
+      ],
+      "properties": {
+        "src": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "caption": {
+          "type": "string"
+        }
+      }
+    },
+    "intro": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "heading",
+          "paragraphs"
+        ],
+        "properties": {
+          "heading": {
+            "type": "string",
+            "minLength": 1
+          },
+          "paragraphs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "src",
+          "alt"
+        ],
+        "properties": {
+          "src": {
+            "type": "string",
+            "minLength": 1
+          },
+          "alt": {
+            "type": "string",
+            "minLength": 1
+          },
+          "caption": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "bible_verse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference",
+        "text"
+      ],
+      "properties": {
+        "reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "closing": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "seo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "description",
+        "keywords"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "og": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "description",
+        "image"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "image": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "related_articles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+      }
+    }
+  }
+}

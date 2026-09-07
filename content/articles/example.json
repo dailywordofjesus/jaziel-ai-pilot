@@ -1,33 +1,67 @@
 {
-  "slug": "example-article",
-  "title": "A Quiet Reminder That Hope Is Still Near",
-  "description": "A Christian reflection about hope, prayer, and trusting Jesus in difficult seasons.",
-  "category": "Inspiring Stories",
-  "date": "2026-09-04",
-  "read_time": "4 min read",
-  "cover_image": "images/articles/example-article/photo-1-cover.jpg",
-  "cover_alt": "Golden morning light over a peaceful mountain landscape.",
-  "dek": "When life feels uncertain, faith can remind us that we are not walking alone.",
+  "title": "Finding Hope When Life Feels Impossible",
+  "slug": "finding-hope-when-life-feels-impossible",
+  "description": "A Christian reflection on finding hope in Jesus when life feels overwhelming and uncertain.",
+  "category": "bible-faith",
+  "date": "2026-09-08",
+  "read_time": "5 min read",
+  "dek": "When life feels impossible, God's presence reminds us that hope is never beyond reach.",
+  "cover": {
+    "src": "/images/articles/finding-hope-when-life-feels-impossible.jpg",
+    "alt": "A peaceful sunrise representing hope and faith in God",
+    "caption": "Hope can begin even in the darkest season."
+  },
+  "intro": [
+    "Sometimes life becomes heavier than we expected.",
+    "In those moments, Scripture reminds us that our hope is not based on circumstances, but on God."
+  ],
   "sections": [
     {
-      "heading": "Hope can begin with one quiet moment",
+      "heading": "God Is Near in Difficult Seasons",
       "paragraphs": [
-        "Some days begin with questions we cannot answer. We may not know what tomorrow will bring, but we can choose where to place our trust today.",
-        "Prayer gives us a quiet place to bring our fears before God and remember that Jesus remains near."
-      ],
-      "image": {
-        "src": "images/articles/example-article/photo-2-article.png",
-        "alt": "A person praying beside an open Bible in warm morning light.",
-        "caption": "Faith gives us a quiet place to begin again."
-      }
+        "When we feel overwhelmed, God does not move farther away.",
+        "His presence remains with us even when we cannot see what comes next."
+      ]
+    },
+    {
+      "heading": "Hope Begins With Trust",
+      "paragraphs": [
+        "Faith does not mean that every problem disappears immediately.",
+        "It means trusting God while we continue walking through uncertainty."
+      ]
     }
   ],
-  "verse": {
-    "text": "Peace I leave with you; my peace I give you.",
-    "reference": "John 14:27"
+  "images": [],
+  "bible_verse": {
+    "reference": "Psalm 34:18",
+    "text": "The Lord is close to the brokenhearted and saves those who are crushed in spirit."
   },
   "closing": [
-    "Faith does not promise an easy road. It gives us a reason to keep walking it.",
-    "Take a moment today to pray and place your next step in God's hands."
-  ]
+    "Whatever you are facing today, you do not have to face it alone.",
+    "Keep trusting Jesus, one step at a time."
+  ],
+  "seo": {
+    "title": "Finding Hope When Life Feels Impossible | Jaziel",
+    "description": "Discover Christian encouragement and biblical hope when life feels impossible. Learn how faith in Jesus can help you keep moving forward.",
+    "keywords": [
+      "Christian hope",
+      "hope in Jesus",
+      "Bible encouragement",
+      "Christian faith",
+      "God's hope"
+    ]
+  },
+  "og": {
+    "title": "Finding Hope When Life Feels Impossible",
+    "description": "When life feels impossible, discover the hope we can find in Jesus.",
+    "image": "/images/articles/finding-hope-when-life-feels-impossible.jpg"
+  },
+  "tags": [
+    "hope",
+    "faith",
+    "Jesus",
+    "encouragement",
+    "Bible"
+  ],
+  "related_articles": []
 }

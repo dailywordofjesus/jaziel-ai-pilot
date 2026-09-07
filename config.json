@@ -1,9 +1,30 @@
 {
   "site_name": "Jaziel",
-  "tagline": "Faith \u2022 Hope \u2022 Jesus",
   "pilot_name": "Jaziel AI Pilot",
-  "default_language": "en",
-  "output_format": "html",
-  "article_root": "../JAZIEL-main",
-  "notes": "Keep API keys and private credentials out of this repository."
+  "schema_version": "1.0",
+  "site_url": "",
+  "website_repo": "../JAZIEL-main",
+  "article_root": "articles",
+  "build_output": "generated",
+  "categories": [
+    "bible-faith",
+    "daily-devotional",
+    "inspiring-stories",
+    "prayer",
+    "christian-life"
+  ],
+  "publisher": {
+    "mode": "github",
+    "status": "planned"
+  },
+  "cloudflare": {
+    "mode": "planned",
+    "cron": "planned",
+    "secrets": ["AI_API_KEY", "GITHUB_TOKEN"]
+  },
+  "generation": {
+    "language": "en",
+    "default_read_time": "5 min read",
+    "max_related_articles": 3
+  }
 }
