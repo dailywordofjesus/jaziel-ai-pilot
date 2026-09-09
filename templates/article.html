@@ -17,31 +17,101 @@
   <meta name="twitter:title" content="{{OG_TITLE}}">
   <meta name="twitter:description" content="{{OG_DESCRIPTION}}">
   <meta name="twitter:image" content="{{OG_IMAGE}}">
+  <link rel="stylesheet" href="../../style.css">
   <script type="application/ld+json">{{JSON_LD}}</script>
 </head>
 <body>
-<main class="article-layout container">
-  <article class="article-main">
-    <header class="article-header">
-      <p class="eyebrow">{{CATEGORY}}</p>
-      <h1>{{TITLE}}</h1>
-      <p class="article-dek">{{DEK}}</p>
-      <div class="article-meta">{{DATE_DISPLAY}} <span>•</span> {{READ_TIME}}</div>
-    </header>
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a class="brand" href="{{HOME_URL}}"><span>✦</span><strong>JAZIEL</strong><small>Faith • Hope • Jesus</small></a>
+    <button class="menu-btn" aria-label="Open menu">☰</button>
+    <nav>
+      <a href="{{HOME_URL}}">Home</a>
+      <a href="{{CATEGORY_URL}}">{{CATEGORY}}</a>
+      <a href="../../category/daily-devotional/index.html">Devotional</a>
+      <a href="../../category/prayer/index.html">Prayer</a>
+      <a href="../../pages/about.html">About</a>
+    </nav>
+  </div>
+</header>
 
-    <figure class="article-cover">
-      <img class="article-photo" src="{{COVER_IMAGE}}" alt="{{COVER_ALT}}" width="1200" height="630">
-      {{COVER_CAPTION}}
-    </figure>
+<main>
+  <div class="container breadcrumb">
+    <a href="{{HOME_URL}}">Home</a><span>›</span>
+    <a href="{{CATEGORY_URL}}">{{CATEGORY}}</a><span>›</span>
+    <span>{{TITLE}}</span>
+  </div>
 
-    <div class="article-body">
-      {{INTRO}}
-      {{SECTIONS}}
-      {{IMAGES}}
-      {{VERSE}}
-      {{CLOSING}}
+  <article class="article-layout container">
+    <div class="article-main">
+      <header class="article-header">
+        <p class="eyebrow">{{CATEGORY}}</p>
+        <h1>{{TITLE}}</h1>
+        <p class="article-dek">{{DEK}}</p>
+        <div class="article-meta">{{DATE_DISPLAY}} <span>•</span> {{READ_TIME}}</div>
+      </header>
+
+      <figure class="article-cover">
+        <img class="article-photo" src="{{COVER_IMAGE}}" alt="{{COVER_ALT}}" width="1200" height="630" loading="eager">
+        {{COVER_CAPTION}}
+      </figure>
+
+      <div class="article-body">
+        {{INTRO}}
+        <div class="article-ad ad-slot" aria-label="Advertisement">ADVERTISEMENT</div>
+        {{SECTIONS}}
+        {{IMAGES}}
+        {{VERSE}}
+        {{CLOSING}}
+
+        <div class="article-share">
+          <strong>Share this story</strong>
+          <div class="share-buttons">
+            <a href="#" aria-label="Share on Facebook">Facebook</a>
+            <a href="#" aria-label="Share on X">X</a>
+            <a href="#" aria-label="Share on WhatsApp">WhatsApp</a>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <aside class="article-sidebar">
+      <div class="side-ad ad-slot" aria-label="Advertisement">ADVERTISEMENT</div>
+      <section class="sidebar-box">
+        <p class="eyebrow">JAZIEL</p>
+        <h2>More encouragement</h2>
+        <a href="../../category/prayer/index.html">Prayer for peace and direction →</a>
+        <a href="../../category/bible-faith/index.html">What Scripture says about courage →</a>
+        <a href="../../category/christian-life/index.html">Finding faith in difficult seasons →</a>
+      </section>
+    </aside>
   </article>
 </main>
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <a class="brand footer-brand" href="{{HOME_URL}}"><span>✦</span><strong>JAZIEL</strong><small>Faith • Hope • Jesus</small></a>
+      <p>Stories, Scripture, prayer, and encouragement centered on Jesus.</p>
+    </div>
+    <div>
+      <h3>EXPLORE</h3>
+      <a href="../../category/bible-faith/index.html">Bible &amp; Faith</a>
+      <a href="../../category/daily-devotional/index.html">Daily Devotional</a>
+      <a href="../../category/prayer/index.html">Prayer</a>
+      <a href="../../category/inspiring-stories/index.html">Inspiring Stories</a>
+    </div>
+    <div>
+      <h3>JAZIEL</h3>
+      <a href="../../pages/about.html">About</a>
+      <a href="../../pages/contact.html">Contact</a>
+      <a href="../../pages/privacy.html">Privacy Policy</a>
+      <a href="../../pages/terms.html">Terms of Use</a>
+      <a href="../../pages/disclaimer.html">Disclaimer</a>
+    </div>
+  </div>
+  <div class="container footer-bottom">© 2026 Jaziel. All rights reserved.</div>
+</footer>
+<script src="../../script.js"></script>
 </body>
 </html>
