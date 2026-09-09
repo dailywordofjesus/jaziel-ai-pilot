@@ -1,0 +1,60 @@
+name: Jaziel Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Actually publish generated articles to the Jaziel repository'
+        required: true
+        default: false
+        type: boolean
+  push:
+    branches: [main]
+    paths:
+      - 'content/articles/**'
+      - 'schemas/**'
+      - 'templates/article.html'
+      - 'scripts/generate.py'
+      - 'scripts/validate.py'
+      - 'scripts/publish.py'
+      - 'config.json'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout AI Pilot
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate articles
+        run: python scripts/validate.py
+
+      - name: Generate articles
+        run: python scripts/generate.py
+
+      - name: Verify generated HTML
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$(find generated/articles -type f -name 'index.html' -print -quit)"
+          if grep -RIn --include='*.html' -E '\{\{[^}]+\}\}' generated/articles; then
+            echo 'Unresolved template placeholders found.'
+            exit 1
+          fi
+
+      - name: Publish to Jaziel
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish == true }}
+        env:
+          JAZIEL_PUBLISH_TOKEN: ${{ secrets.JAZIEL_PUBLISH_TOKEN }}
+        run: python scripts/publish.py --apply
