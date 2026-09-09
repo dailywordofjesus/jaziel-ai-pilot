@@ -2,12 +2,14 @@ import argparse
 import json
 import os
 import re
+import time
 import urllib.error
 import urllib.request
 from datetime import date
 from pathlib import Path
 
 DEFAULT_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
+FALLBACK_MODEL = os.environ.get("GEMINI_FALLBACK_MODEL", "gemini-3.7-flash")
 
 OUTPUT_SCHEMA = {
     "type": "object",
@@ -48,12 +50,12 @@ def slugify(value: str) -> str:
     return re.sub(r"^-+|-+$", "", value) or "jaziel-article"
 
 
-def call_gemini(prompt: str) -> dict:
+def call_gemini_once(prompt: str, model: str) -> dict:
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("GEMINI_API_KEY is not available in the GitHub Actions environment.")
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{DEFAULT_MODEL}:generateContent"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {
@@ -83,6 +85,32 @@ def call_gemini(prompt: str) -> dict:
         return json.loads(text)
     except (KeyError, IndexError, TypeError, json.JSONDecodeError) as exc:
         raise RuntimeError(f"Gemini returned an unexpected response: {json.dumps(data)[:2000]}") from exc
+
+
+def call_gemini(prompt: str) -> dict:
+    models = [DEFAULT_MODEL]
+    if FALLBACK_MODEL and FALLBACK_MODEL not in models:
+        models.append(FALLBACK_MODEL)
+
+    last_error = None
+    for model in models:
+        for attempt in range(3):
+            try:
+                print(f"Calling Gemini model: {model} (attempt {attempt + 1}/3)")
+                return call_gemini_once(prompt, model)
+            except RuntimeError as exc:
+                last_error = exc
+                message = str(exc)
+                retryable = any(code in message for code in ("HTTP 429", "HTTP 500", "HTTP 502", "HTTP 503", "HTTP 504"))
+                if not retryable:
+                    raise
+                if attempt < 2:
+                    delay = 2 ** attempt
+                    print(f"Temporary Gemini service error; retrying in {delay}s...")
+                    time.sleep(delay)
+        print(f"Model {model} remained unavailable; trying fallback model if configured.")
+
+    raise last_error or RuntimeError("Gemini request failed.")
 
 
 def build_prompt(draft: dict) -> str:
@@ -184,7 +212,6 @@ def main() -> int:
     args = parser.parse_args()
 
     draft = json.loads(Path(args.input).read_text(encoding="utf-8"))
-    print(f"Calling Gemini model: {DEFAULT_MODEL}")
     ai = call_gemini(build_prompt(draft))
     article = build_article(draft, ai)
 
