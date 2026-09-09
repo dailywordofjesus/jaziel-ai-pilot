@@ -42,9 +42,11 @@ def article_asset_url(site_url, path):
         return path
     if site_url:
         return absolute_url(site_url, path)
-    # Generated articles are intended to live at /articles/<slug>/index.html
-    # in the Jaziel website, so assets are two levels above the article page.
-    return "../../" + path.lstrip("/")
+    # Generated articles live at /articles/<slug>/index.html.
+    # From that location, the site root is three levels up:
+    # /articles/<slug>/index.html -> /articles/<slug>/ -> /articles/ -> /
+    # Therefore root-relative content paths such as /content/images/... need ../../../.
+    return "../../../" + path.lstrip("/")
 
 
 def display_date(value):
