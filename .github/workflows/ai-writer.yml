@@ -12,6 +12,7 @@ on:
         required: true
         type: boolean
         default: false
+
   repository_dispatch:
     types: [jaziel_ai_build]
 
@@ -21,6 +22,7 @@ permissions:
 jobs:
   ai-writer:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Pilot
         uses: actions/checkout@v4
@@ -58,10 +60,20 @@ jobs:
           DRAFT_FILE: ${{ steps.inputs.outputs.draft_file }}
         run: |
           set -euo pipefail
-          test -n "${GEMINI_API_KEY:-}" || { echo 'GEMINI_API_KEY secret is missing.'; exit 1; }
-          test -f "$DRAFT_FILE" || { echo "Draft not found: $DRAFT_FILE"; exit 1; }
+
+          test -n "${GEMINI_API_KEY:-}" || {
+            echo "GEMINI_API_KEY secret is missing."
+            exit 1
+          }
+
+          test -f "$DRAFT_FILE" || {
+            echo "Draft not found: $DRAFT_FILE"
+            exit 1
+          }
+
           mkdir -p content/articles generated/articles
-          python scripts/ai_writer.py --input "$DRAFT_FILE" --output content/articles/ai-test.json
+
+          python scripts/ai_writer.py             --input "$DRAFT_FILE"             --output content/articles/ai-test.json
 
       - name: Validate Schema v1
         run: python scripts/validate.py
@@ -69,15 +81,62 @@ jobs:
       - name: Generate HTML
         run: python scripts/generate.py
 
-      - name: Verify generated HTML
+      - name: Resolve generated article slug
+        id: article
         shell: bash
         run: |
           set -euo pipefail
-          test -f generated/articles/ai-test/index.html
-          if grep -nE '\{\{[^}]+\}\}' generated/articles/ai-test/index.html; then
-            echo 'Unresolved template placeholders found.'
+
+          test -f content/articles/ai-test.json || {
+            echo "Generated article JSON not found."
+            exit 1
+          }
+
+          SLUG="$(python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(
+              Path("content/articles/ai-test.json").read_text(encoding="utf-8")
+          )
+
+          slug = str(data.get("slug", "")).strip()
+
+          if not slug:
+              raise SystemExit("Article slug is missing from ai-test.json")
+
+          print(slug)
+          PY
+          )"
+
+          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+          echo "Generated article slug: $SLUG"
+
+      - name: Verify generated HTML
+        shell: bash
+        env:
+          SLUG: ${{ steps.article.outputs.slug }}
+        run: |
+          set -euo pipefail
+
+          HTML_PATH="generated/articles/${SLUG}/index.html"
+
+          echo "Checking generated HTML:"
+          echo "$HTML_PATH"
+
+          test -f "$HTML_PATH" || {
+            echo "Generated HTML not found: $HTML_PATH"
+            echo "Available generated article directories:"
+            find generated/articles -maxdepth 2 -type f -name "index.html" -print || true
+            exit 1
+          }
+
+          if grep -nE '\{\{[^}]+\}\}' "$HTML_PATH"; then
+            echo "Unresolved template placeholders found."
             exit 1
           fi
+
+          echo "Generated HTML verification passed."
 
       - name: Upload Gemini result
         uses: actions/upload-artifact@v4
@@ -85,7 +144,7 @@ jobs:
           name: jaziel-ai-result
           path: |
             content/articles/ai-test.json
-            generated/articles/ai-test/index.html
+            generated/articles/${{ steps.article.outputs.slug }}/index.html
           if-no-files-found: error
 
       - name: Publish to Jaziel
