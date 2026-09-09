@@ -43,6 +43,7 @@ async function githubFetch(env, path, options = {}) {
       Accept: "application/vnd.github+json",
       Authorization: `Bearer ${env.GITHUB_TOKEN}`,
       "X-GitHub-Api-Version": API_VERSION,
+      "User-Agent": "Jaziel-AI-Pilot",
       "Content-Type": "application/json",
       ...(options.headers || {})
     }
