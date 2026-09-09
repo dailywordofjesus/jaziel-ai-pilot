@@ -1,0 +1,11 @@
+name = "jaziel-ai-bridge"
+main = "worker.js"
+compatibility_date = "2026-09-07"
+
+[vars]
+GITHUB_REPO = "dailywordofjesus/jaziel-ai-pilot"
+GITHUB_BRANCH = "main"
+ALLOWED_ORIGIN = "https://dailywordofjesus.github.io"
+
+[secrets]
+required = ["GITHUB_TOKEN"]
