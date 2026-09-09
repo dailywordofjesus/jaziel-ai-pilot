@@ -17,7 +17,7 @@
   <section class="intro">
     <p class="eyebrow">CONTENT CONTROL CENTER</p>
     <h1>Build the next Jaziel story.</h1>
-    <p>Prepare the article, bring up to four images, and create a schema-ready package without touching the GitHub Publisher workflow.</p>
+    <p>Give the Pilot your Indonesian draft and choose the images yourself. The Pilot focuses on improving the article and preparing the Jaziel Schema v1 package.</p>
   </section>
 
   <section class="workspace">
@@ -41,18 +41,28 @@
 
         <div class="image-intake">
           <div class="image-intake-head">
-            <div><b>Article images</b><small>Choose up to 4 images. The Pilot will create a story-aware placement plan.</small></div>
-            <span id="imageCount">0 / 4</span>
+            <div><b>Cover image</b><small>You choose the exact photo used as the article cover.</small></div>
+            <span id="coverCount">0 / 1</span>
           </div>
-          <input id="imageFiles" type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple>
-          <div id="imagePreview" class="image-preview empty-images">
-            <p>Select the four photos you want to use for this article.</p>
+          <input id="coverFile" type="file" accept="image/jpeg,image/png,image/webp,image/avif">
+          <div id="coverPreview" class="image-preview empty-images">
+            <p>Select one cover photo.</p>
           </div>
         </div>
 
-        <label>Cover image path<input id="cover" value="/images/articles/your-article/photo-1-cover.jpg"></label>
+        <div class="image-intake">
+          <div class="image-intake-head">
+            <div><b>Images inside article</b><small>You choose the order. Add 1–4 photos; the AI does not rearrange them.</small></div>
+            <span id="articleImageCount">0 / 4</span>
+          </div>
+          <input id="imageFiles" type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple>
+          <div id="imagePreview" class="image-preview empty-images">
+            <p>Add up to four article photos.</p>
+          </div>
+        </div>
+
         <label>Article body
-          <textarea id="body" rows="12" placeholder="Write or paste the article body here. Separate paragraphs with a blank line."></textarea>
+          <textarea id="body" rows="14" placeholder="Paste your article in Indonesian here. The AI/content workflow can improve the writing while keeping the story's facts and meaning."></textarea>
         </label>
         <div class="two">
           <label>Bible verse reference<input id="verseReference" placeholder="Psalm 34:18-19"></label>
@@ -78,7 +88,7 @@
           <span class="ready">READY</span>
         </div>
         <div class="image-plan-box">
-          <div class="plan-head"><b>Image placement plan</b><span id="planStatus">SMART MATCH</span></div>
+          <div class="plan-head"><b>Your image selection</b><span id="planStatus">MANUAL</span></div>
           <div id="imagePlan"></div>
         </div>
         <label>Generated HTML<textarea id="output" rows="12" readonly></textarea></label>
@@ -94,11 +104,11 @@
   </section>
 
   <section class="roadmap">
-    <div><p class="eyebrow">PILOT ROADMAP</p><h2>Built for the Jaziel workflow</h2></div>
+    <div><p class="eyebrow">PILOT WORKFLOW</p><h2>AI writes. You control the images.</h2></div>
     <div class="roadmap-grid">
-      <article><b>01 · Plan</b><h3>Article brief</h3><p>Title, category, description, images and body.</p></article>
-      <article><b>02 · Prepare</b><h3>Schema package</h3><p>Builds a Jaziel Article Schema v1 JSON package and upload-ready HTML.</p></article>
-      <article><b>03 · Publish</b><h3>GitHub Publisher</h3><p>The existing GitHub Actions Publisher remains unchanged and continues to publish validated generated articles.</p></article>
+      <article><b>01 · INPUT</b><h3>Your story</h3><p>Paste the Indonesian article and provide the key Bible verse information.</p></article>
+      <article><b>02 · IMAGES</b><h3>Your choices</h3><p>Select one cover image and up to four article images. Their order is preserved.</p></article>
+      <article><b>03 · PUBLISH</b><h3>GitHub Publisher</h3><p>The existing GitHub Actions Publisher remains unchanged and continues to publish validated generated articles.</p></article>
     </div>
   </section>
 </main>
