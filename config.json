@@ -3,7 +3,7 @@
   "pilot_name": "Jaziel AI Pilot",
   "schema_version": "1.0",
   "site_url": "",
-  "website_repo": "../JAZIEL-main",
+  "website_repo": "dailywordofjesus/jaziel",
   "article_root": "articles",
   "build_output": "generated",
   "categories": [
@@ -15,12 +15,18 @@
   ],
   "publisher": {
     "mode": "github",
-    "status": "planned"
+    "status": "implemented",
+    "target": {
+      "owner": "dailywordofjesus",
+      "repo": "jaziel",
+      "branch": "main",
+      "site_subdir": "articles"
+    }
   },
   "cloudflare": {
     "mode": "planned",
     "cron": "planned",
-    "secrets": ["AI_API_KEY", "GITHUB_TOKEN"]
+    "secrets": ["AI_API_KEY", "JAZIEL_PUBLISH_TOKEN"]
   },
   "generation": {
     "language": "en",
