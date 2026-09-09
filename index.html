@@ -10,14 +10,14 @@
 <body>
 <header class="topbar">
   <div class="brand"><span>✦</span><div><strong>JAZIEL</strong><small>AI PILOT</small></div></div>
-  <div class="status"><i></i> Local workspace</div>
+  <div class="status"><i></i> Gemini draft workspace</div>
 </header>
 
 <main class="shell">
   <section class="intro">
     <p class="eyebrow">CONTENT CONTROL CENTER</p>
     <h1>Build the next Jaziel story.</h1>
-    <p>Give the Pilot your Indonesian draft and choose the images yourself. The Pilot focuses on improving the article and preparing the Jaziel Schema v1 package.</p>
+    <p>Give the Pilot your Indonesian draft and choose the images yourself. Gemini improves the article and prepares the Jaziel Schema v1 package.</p>
   </section>
 
   <section class="workspace">
@@ -37,33 +37,20 @@
           </label>
           <label>Read time<input id="readTime" value="5 min read"></label>
         </div>
-        <label>Short description<textarea id="dek" rows="3" placeholder="A short description for the article and social sharing."></textarea></label>
 
         <div class="image-intake">
-          <div class="image-intake-head">
-            <div><b>Cover image</b><small>You choose the exact photo used as the article cover.</small></div>
-            <span id="coverCount">0 / 1</span>
-          </div>
+          <div class="image-intake-head"><div><b>Cover image</b><small>You choose the exact photo used as the article cover.</small></div><span id="coverCount">0 / 1</span></div>
           <input id="coverFile" type="file" accept="image/jpeg,image/png,image/webp,image/avif">
-          <div id="coverPreview" class="image-preview empty-images">
-            <p>Select one cover photo.</p>
-          </div>
+          <div id="coverPreview" class="image-preview empty-images"><p>Select one cover photo.</p></div>
         </div>
 
         <div class="image-intake">
-          <div class="image-intake-head">
-            <div><b>Images inside article</b><small>You choose the order. Add 1–4 photos; the AI does not rearrange them.</small></div>
-            <span id="articleImageCount">0 / 4</span>
-          </div>
+          <div class="image-intake-head"><div><b>Images inside article</b><small>You choose the order. Add 1–4 photos; Gemini does not rearrange them.</small></div><span id="articleImageCount">0 / 4</span></div>
           <input id="imageFiles" type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple>
-          <div id="imagePreview" class="image-preview empty-images">
-            <p>Add up to four article photos.</p>
-          </div>
+          <div id="imagePreview" class="image-preview empty-images"><p>Add up to four article photos.</p></div>
         </div>
 
-        <label>Article body
-          <textarea id="body" rows="14" placeholder="Paste your article in Indonesian here. The AI/content workflow can improve the writing while keeping the story's facts and meaning."></textarea>
-        </label>
+        <label>Article body<textarea id="body" rows="14" placeholder="Paste your article in Indonesian here. Gemini will improve the writing while keeping the story's facts and meaning."></textarea></label>
         <div class="two">
           <label>Bible verse reference<input id="verseReference" placeholder="Psalm 34:18-19"></label>
           <label>Bible verse text<input id="verseText" placeholder="The Lord is close to the brokenhearted..."></label>
@@ -77,43 +64,26 @@
 
     <div class="panel preview-panel">
       <div class="panel-head"><h2>Output</h2><span>STEP 2</span></div>
-      <div id="empty" class="empty">
-        <div>✦</div>
-        <h3>No article generated yet</h3>
-        <p>Fill in the brief and click <b>Build article</b>.</p>
-      </div>
+      <div id="empty" class="empty"><div>✦</div><h3>No article generated yet</h3><p>Fill in the brief and click <b>Build article</b>.</p></div>
       <div id="result" hidden>
-        <div class="result-box">
-          <div><b id="resultTitle"></b><small id="resultMeta"></small></div>
-          <span class="ready">READY</span>
-        </div>
-        <div class="image-plan-box">
-          <div class="plan-head"><b>Your image selection</b><span id="planStatus">MANUAL</span></div>
-          <div id="imagePlan"></div>
-        </div>
-        <label>Generated HTML<textarea id="output" rows="12" readonly></textarea></label>
-        <label>Jaziel Article Schema v1 JSON<textarea id="jsonOutput" rows="12" readonly></textarea></label>
+        <div class="result-box"><div><b id="resultTitle"></b><small id="resultMeta"></small></div><span class="ready">SUBMITTED</span></div>
+        <div class="image-plan-box"><div class="plan-head"><b>Your image selection</b><span id="planStatus">MANUAL</span></div><div id="imagePlan"></div></div>
+        <label>Build status<textarea id="output" rows="8" readonly></textarea></label>
+        <label>Submitted Draft JSON<textarea id="jsonOutput" rows="12" readonly></textarea></label>
         <div class="actions">
-          <button class="secondary" id="copyBtn">Copy HTML</button>
+          <button class="secondary" id="copyBtn">Copy status</button>
           <button class="secondary" id="copyJsonBtn">Copy JSON</button>
-          <button id="downloadBtn">Download HTML</button>
+          <button id="downloadBtn">Download status</button>
           <button id="downloadJsonBtn">Download JSON</button>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="roadmap">
-    <div><p class="eyebrow">PILOT WORKFLOW</p><h2>AI writes. You control the images.</h2></div>
-    <div class="roadmap-grid">
-      <article><b>01 · INPUT</b><h3>Your story</h3><p>Paste the Indonesian article and provide the key Bible verse information.</p></article>
-      <article><b>02 · IMAGES</b><h3>Your choices</h3><p>Select one cover image and up to four article images. Their order is preserved.</p></article>
-      <article><b>03 · PUBLISH</b><h3>GitHub Publisher</h3><p>The existing GitHub Actions Publisher remains unchanged and continues to publish validated generated articles.</p></article>
-    </div>
-  </section>
+  <section class="roadmap"><div><p class="eyebrow">PILOT WORKFLOW</p><h2>AI writes. You control the images.</h2></div><div class="roadmap-grid"><article><b>01 · INPUT</b><h3>Your story</h3><p>Paste the Indonesian article. Gemini creates the English article and metadata.</p></article><article><b>02 · IMAGES</b><h3>Your choices</h3><p>Select one cover image and up to four article images. Their order is preserved.</p></article><article><b>03 · REVIEW</b><h3>Publish later</h3><p>The bridge triggers Gemini with publishing disabled. Review the generated result before publishing.</p></article></div></section>
 </main>
-
-<footer>Jaziel AI Pilot · Internal content workspace</footer>
+<footer>Jaziel AI Pilot · Gemini content workspace</footer>
+<script src="scripts/bridge-config.js"></script>
 <script src="scripts/app.js"></script>
 </body>
 </html>
