@@ -35,6 +35,18 @@ def absolute_url(site_url, path):
     return site_url.rstrip("/") + "/" + path.lstrip("/")
 
 
+def article_asset_url(site_url, path):
+    if not path:
+        return ""
+    if path.startswith("http://") or path.startswith("https://"):
+        return path
+    if site_url:
+        return absolute_url(site_url, path)
+    # Generated articles are intended to live at /articles/<slug>/index.html
+    # in the Jaziel website, so assets are two levels above the article page.
+    return "../../" + path.lstrip("/")
+
+
 def display_date(value):
     y, m, d = map(int, value.split("-"))
     return date(y, m, d).strftime("%B %-d, %Y")
@@ -52,15 +64,16 @@ def render_sections(sections):
     return "\n\n".join(blocks)
 
 
-def render_images(images):
+def render_images(images, site_url):
     blocks = []
     for image in images:
         caption = image.get("caption", "")
         figcaption = f'<figcaption>{escape(caption)}</figcaption>' if caption else ""
+        src = article_asset_url(site_url, image["src"])
         blocks.append(
             '<figure class="article-inline-image">'
-            f'<img class="article-photo" src="{escape(image["src"])}" '
-            f'alt="{escape(image["alt"])}" loading="lazy">'
+            f'<img class="article-photo" src="{escape(src, quote=True)}" '
+            f'alt="{escape(image["alt"], quote=True)}" loading="lazy">'
             f'{figcaption}</figure>'
         )
     return "\n".join(blocks)
@@ -97,9 +110,11 @@ def build_json_ld(data, article_url, image_url):
 
 
 def render_article(data, site_url):
-    article_url = absolute_url(site_url, f"/articles/{data['slug']}/")
-    cover_url = absolute_url(site_url, data["cover"]["src"])
-    og_image = absolute_url(site_url, data["og"]["image"])
+    article_url = absolute_url(site_url, f"/articles/{data['slug']}/") or f"/articles/{data['slug']}/"
+    cover_url = article_asset_url(site_url, data["cover"]["src"])
+    og_image = article_asset_url(site_url, data["og"]["image"])
+    home_url = absolute_url(site_url, "/") or "../../index.html"
+    category_url = f"../../category/{data['category']}/index.html"
 
     values = {
         "{{SEO_TITLE}}": escape(data["seo"]["title"], quote=True),
@@ -110,6 +125,8 @@ def render_article(data, site_url):
         "{{OG_IMAGE}}": escape(og_image, quote=True),
         "{{ARTICLE_URL}}": escape(article_url, quote=True),
         "{{JSON_LD}}": escape(build_json_ld(data, article_url, cover_url), quote=False),
+        "{{HOME_URL}}": escape(home_url, quote=True),
+        "{{CATEGORY_URL}}": escape(category_url, quote=True),
         "{{CATEGORY}}": escape(data["category"]),
         "{{TITLE}}": escape(data["title"]),
         "{{DEK}}": escape(data["dek"]),
@@ -120,7 +137,7 @@ def render_article(data, site_url):
         "{{COVER_CAPTION}}": render_cover_caption(data["cover"].get("caption", "")),
         "{{INTRO}}": paragraphs(data["intro"]),
         "{{SECTIONS}}": render_sections(data["sections"]),
-        "{{IMAGES}}": render_images(data.get("images", [])),
+        "{{IMAGES}}": render_images(data.get("images", []), site_url),
         "{{VERSE}}": render_verse(data["bible_verse"]),
         "{{CLOSING}}": paragraphs(data["closing"])
     }
