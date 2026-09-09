@@ -3,37 +3,37 @@ const title = document.getElementById("title");
 const category = document.getElementById("category");
 const readTime = document.getElementById("readTime");
 const dek = document.getElementById("dek");
-const cover = document.getElementById("cover");
 const body = document.getElementById("body");
 const verseReference = document.getElementById("verseReference");
 const verseText = document.getElementById("verseText");
+const coverFile = document.getElementById("coverFile");
+const coverPreview = document.getElementById("coverPreview");
+const coverCount = document.getElementById("coverCount");
 const imageFiles = document.getElementById("imageFiles");
 const imagePreview = document.getElementById("imagePreview");
-const imageCount = document.getElementById("imageCount");
+const articleImageCount = document.getElementById("articleImageCount");
 const output = document.getElementById("output");
 const jsonOutput = document.getElementById("jsonOutput");
 const result = document.getElementById("result");
 const empty = document.getElementById("empty");
 const imagePlan = document.getElementById("imagePlan");
 
-let selectedImages = [];
+let coverImage = null;
+let articleImages = [];
 
 function esc(value) {
-  return String(value).replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
+  return String(value ?? "").replace(/[&<>\"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   }[c]));
 }
 
 function slug(value) {
-  return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return String(value || "").toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 function paragraphs(value) {
-  return value.trim().split(/\n\s*\n/).filter(Boolean);
+  return String(value || "").trim().split(/\n\s*\n/).filter(Boolean);
 }
 
 function paragraphHtml(items) {
@@ -41,156 +41,107 @@ function paragraphHtml(items) {
 }
 
 function titleCase(value) {
-  return value.replace(/[-_]+/g, " ").replace(/\.[^.]+$/, "").replace(/\b\w/g, (m) => m.toUpperCase());
+  return String(value || "").replace(/[-_]+/g, " ")
+    .replace(/\.[^.]+$/, "").replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
-function fileRoleText(file, description) {
-  return `${file.name} ${description || ""}`.toLowerCase();
+function imagePath(file) {
+  if (!file) return "";
+  return `/images/articles/${slug(title.value)}/${file.name}`;
 }
 
-function scoreImage(text, keywords) {
-  return keywords.reduce((score, word) => score + (text.includes(word) ? 1 : 0), 0);
-}
-
-function chooseImagePlan() {
-  const articleText = `${title.value} ${dek.value} ${body.value}`.toLowerCase();
-  const images = selectedImages.map((item, index) => ({
-    ...item,
-    index,
-    text: fileRoleText(item.file, item.description)
-  }));
-
-  if (!images.length) return [];
-
-  const roles = [
-    {
-      role: "Cover",
-      keywords: ["cover", "hero", "trophy", "victory", "champion", "world cup", "main"],
-      fallback: "Best overall image for the story"
-    },
-    {
-      role: "Story context",
-      keywords: ["family", "father", "mother", "parent", "home", "childhood"],
-      fallback: "Image that explains the personal story"
-    },
-    {
-      role: "Turning point",
-      keywords: ["father", "reunion", "safe", "found", "return", "emotional", "prayer"],
-      fallback: "Image that fits the story's turning point"
-    },
-    {
-      role: "Closing reflection",
-      keywords: ["family", "memory", "history", "legacy", "together", "smile", "hope"],
-      fallback: "Image that supports the closing reflection"
-    }
-  ];
-
-  const used = new Set();
-  const plan = [];
-  const articleBoost = articleText.split(/\W+/).filter(Boolean);
-
-  roles.forEach((role, roleIndex) => {
-    let best = null;
-    images.forEach((image) => {
-      if (used.has(image.index)) return;
-      const base = scoreImage(image.text, role.keywords);
-      const context = role.keywords.reduce((score, word) => score + (articleBoost.includes(word) ? 0.2 : 0), 0);
-      const value = base + context;
-      if (!best || value > best.value) best = { image, value };
-    });
-
-    if (!best) {
-      const fallback = images[roleIndex % images.length];
-      best = { image: fallback, value: 0 };
-    }
-
-    used.add(best.image.index);
-    plan.push({
-      role: role.role,
-      file: best.image.file.name,
-      description: best.image.description || titleCase(best.image.file.name),
-      reason: best.value > 0 ? "Matched to article context and image description." : role.fallback,
-      src: `/images/articles/${slug(title.value)}/${best.image.file.name}`
-    });
-  });
-
-  return plan.slice(0, images.length);
-}
-
-function renderImagePreview() {
-  imageCount.textContent = `${selectedImages.length} / 4`;
-  if (!selectedImages.length) {
-    imagePreview.className = "image-preview empty-images";
-    imagePreview.innerHTML = "<p>Select the four photos you want to use for this article.</p>";
+function renderCoverPreview() {
+  coverCount.textContent = coverImage ? "1 / 1" : "0 / 1";
+  if (!coverImage) {
+    coverPreview.className = "image-preview empty-images";
+    coverPreview.innerHTML = "<p>Select one cover photo.</p>";
     return;
   }
+  const url = URL.createObjectURL(coverImage);
+  coverPreview.className = "image-preview";
+  coverPreview.innerHTML = `<div class="image-card">
+    <img src="${url}" alt="${esc(coverImage.name)}">
+    <div class="image-card-body"><b>Cover</b><small>${esc(coverImage.name)}</small></div>
+  </div>`;
+}
 
+function renderArticleImages() {
+  articleImageCount.textContent = `${articleImages.length} / 4`;
+  if (!articleImages.length) {
+    imagePreview.className = "image-preview empty-images";
+    imagePreview.innerHTML = "<p>Add up to four article photos.</p>";
+    return;
+  }
   imagePreview.className = "image-preview";
-  imagePreview.innerHTML = selectedImages.map((item, index) => {
+  imagePreview.innerHTML = articleImages.map((item, index) => {
     const url = URL.createObjectURL(item.file);
     return `<div class="image-card">
       <img src="${url}" alt="${esc(item.file.name)}">
       <div class="image-card-body">
-        <b>Photo ${index + 1}</b>
+        <b>Article photo ${index + 1}</b>
         <small>${esc(item.file.name)}</small>
-        <input data-image-description="${index}" value="${esc(item.description)}" placeholder="Optional description, e.g. Romário with his father">
+        <input data-image-description="${index}" value="${esc(item.description)}" placeholder="Optional caption / alt text">
       </div>
     </div>`;
   }).join("");
 
   imagePreview.querySelectorAll("[data-image-description]").forEach((input) => {
     input.addEventListener("input", () => {
-      const index = Number(input.dataset.imageDescription);
-      selectedImages[index].description = input.value;
+      articleImages[Number(input.dataset.imageDescription)].description = input.value;
     });
   });
 }
 
-imageFiles.addEventListener("change", () => {
-  const files = Array.from(imageFiles.files || []).filter((file) => file.type.startsWith("image/")).slice(0, 4);
-  selectedImages = files.map((file) => ({
-    file,
-    description: ""
-  }));
-  renderImagePreview();
+coverFile.addEventListener("change", () => {
+  coverImage = Array.from(coverFile.files || []).find((file) => file.type.startsWith("image/")) || null;
+  renderCoverPreview();
 });
 
-function buildSchema(plan) {
+imageFiles.addEventListener("change", () => {
+  articleImages = Array.from(imageFiles.files || [])
+    .filter((file) => file.type.startsWith("image/"))
+    .slice(0, 4)
+    .map((file) => ({ file, description: "" }));
+  renderArticleImages();
+});
+
+function buildSchema() {
   const t = title.value.trim();
   const d = dek.value.trim() || `A Christian reflection on ${t.toLowerCase()}.`;
   const bodyItems = paragraphs(body.value);
-  const groups = [];
-  const chunkSize = Math.max(1, Math.ceil(bodyItems.length / 3));
+  const articleSlug = slug(t);
+  const coverSrc = coverImage ? imagePath(coverImage) : "";
+  const images = articleImages.map((item, index) => ({
+    src: imagePath(item.file),
+    alt: item.description || titleCase(item.file.name),
+    caption: item.description || "",
+    order: index + 1
+  }));
 
+  const chunkSize = Math.max(1, Math.ceil(bodyItems.length / 3));
+  const sections = [];
   for (let i = 0; i < bodyItems.length; i += chunkSize) {
-    groups.push({
+    sections.push({
       heading: i === 0 ? "When the Storm Comes" : i === chunkSize ? "Keep Holding On to Hope" : "What This Story Reminds Us",
       paragraphs: bodyItems.slice(i, i + chunkSize)
     });
   }
 
-  const coverImage = plan.find((item) => item.role === "Cover") || plan[0];
-  const images = plan.filter((item) => item.role !== "Cover").map((item) => ({
-    src: item.src,
-    alt: item.description || item.role,
-    caption: item.description || ""
-  }));
-
   return {
     title: t,
-    slug: slug(t),
+    slug: articleSlug,
     description: d,
     category: category.value,
     date: new Date().toISOString().slice(0, 10),
     read_time: readTime.value.trim() || "5 min read",
     dek: d,
     cover: {
-      src: coverImage ? coverImage.src : cover.value.trim(),
-      alt: coverImage ? coverImage.description : t,
-      caption: coverImage ? coverImage.description : ""
+      src: coverSrc,
+      alt: coverImage ? titleCase(coverImage.name) : t,
+      caption: ""
     },
     intro: bodyItems.slice(0, Math.min(2, bodyItems.length)),
-    sections: groups.length ? groups : [{ heading: "A Story of Hope", paragraphs: [d] }],
+    sections: sections.length ? sections : [{ heading: "A Story of Hope", paragraphs: [d] }],
     images,
     bible_verse: {
       reference: verseReference.value.trim() || "Psalm 34:18",
@@ -202,28 +153,20 @@ function buildSchema(plan) {
       description: d,
       keywords: ["Christian hope", "faith", "Jesus", "encouragement", "Bible"]
     },
-    og: {
-      title: t,
-      description: d,
-      image: coverImage ? coverImage.src : cover.value.trim()
-    },
+    og: { title: t, description: d, image: coverSrc },
     tags: ["faith", "Jesus", "hope", "encouragement"],
     related_articles: []
   };
 }
 
-function build(plan) {
-  const t = title.value.trim();
-  const d = dek.value.trim();
-  const img = (plan.find((item) => item.role === "Cover") || plan[0])?.src || cover.value.trim();
-  const categoryValue = category.value.trim();
-  const readTimeValue = readTime.value.trim();
+function buildHtml(schema) {
+  const t = schema.title;
+  const d = schema.description;
   const bodyItems = paragraphs(body.value);
   const bodyHtml = paragraphHtml(bodyItems);
-  const articleSlug = slug(t);
-  const schema = buildSchema(plan);
+  const inlineImages = schema.images.map((item) => `<figure class="article-inline-image"><img class="article-photo" src="${esc(item.src)}" alt="${esc(item.alt)}" loading="lazy"><figcaption>${esc(item.caption)}</figcaption></figure>`).join("\n");
 
-  const html = `<!doctype html>
+  return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -234,11 +177,11 @@ function build(plan) {
 <meta property="og:type" content="article">
 <meta property="og:title" content="${esc(t)}">
 <meta property="og:description" content="${esc(d)}">
-<meta property="og:image" content="${esc(img)}">
+<meta property="og:image" content="${esc(schema.cover.src)}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(t)}">
 <meta name="twitter:description" content="${esc(d)}">
-<meta name="twitter:image" content="${esc(img)}">
+<meta name="twitter:image" content="${esc(schema.cover.src)}">
 <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -248,47 +191,47 @@ function build(plan) {
 <nav><a href="../index.html">Home</a><a href="#">Bible</a><a href="#">Devotional</a><a class="active" href="#">Stories</a><a href="#">Prayer</a><a href="#">About</a></nav>
 </div></header>
 <main>
-<div class="container breadcrumb"><a href="../index.html">Home</a><span>›</span><span>${esc(categoryValue)}</span><span>›</span><span>${esc(t)}</span></div>
+<div class="container breadcrumb"><a href="../index.html">Home</a><span>›</span><span>${esc(schema.category)}</span><span>›</span><span>${esc(t)}</span></div>
 <article class="article-layout container">
 <div class="article-main">
 <header class="article-header">
-<p class="eyebrow">${esc(categoryValue).toUpperCase()}</p>
+<p class="eyebrow">${esc(schema.category).toUpperCase()}</p>
 <h1>${esc(t)}</h1>
 <p class="article-dek">${esc(d)}</p>
-<div class="article-meta">${new Date().toLocaleDateString("en-US", {year:"numeric", month:"long", day:"numeric"})} <span>•</span> ${esc(readTimeValue)}</div>
+<div class="article-meta">${new Date().toLocaleDateString("en-US", {year:"numeric", month:"long", day:"numeric"})} <span>•</span> ${esc(schema.read_time)}</div>
 </header>
-<figure class="article-cover"><img class="article-photo" src="${esc(img)}" alt="${esc(t)}" loading="eager"><figcaption>Jaziel · Faith • Hope • Jesus</figcaption></figure>
+${schema.cover.src ? `<figure class="article-cover"><img class="article-photo" src="${esc(schema.cover.src)}" alt="${esc(schema.cover.alt)}" loading="eager"><figcaption>Jaziel · Faith • Hope • Jesus</figcaption></figure>` : ""}
 <div class="article-body">${bodyHtml}</div>
-${plan.filter((item) => item.role !== "Cover").map((item) => `<figure class="article-inline-image"><img class="article-photo" src="${esc(item.src)}" alt="${esc(item.description)}" loading="lazy"><figcaption>${esc(item.description)}</figcaption></figure>`).join("\n")}
+${inlineImages}
 </div>
 <aside class="article-sidebar"><div class="side-ad ad-slot" aria-label="Advertisement">ADVERTISEMENT</div></aside>
 </article>
 </main>
 <footer class="site-footer"><div class="container footer-bottom">© 2026 Jaziel. All rights reserved.</div></footer>
 </body></html>`;
-
-  output.value = html;
-  jsonOutput.value = JSON.stringify(schema, null, 2);
-  document.getElementById("resultTitle").textContent = t;
-  document.getElementById("resultMeta").textContent = `${categoryValue} · ${readTimeValue}`;
-  empty.hidden = true;
-  result.hidden = false;
-  renderPlan(plan);
-  return articleSlug;
 }
 
-function renderPlan(plan) {
-  if (!plan.length) {
-    imagePlan.innerHTML = `<p class="plan-empty">No new image files selected. The existing cover path will be used.</p>`;
-    return;
+function renderPlan(schema) {
+  const rows = [];
+  if (schema.cover.src) {
+    rows.push(`<div class="plan-row"><div><b>Cover</b><small>${esc(coverImage.name)}</small></div><span>Chosen by you</span></div>`);
   }
-  imagePlan.innerHTML = plan.map((item) => `<div class="plan-row"><div><b>${esc(item.role)}</b><small>${esc(item.file)}</small></div><span>${esc(item.reason)}</span></div>`).join("");
+  schema.images.forEach((item, index) => {
+    rows.push(`<div class="plan-row"><div><b>Article photo ${index + 1}</b><small>${esc(articleImages[index].file.name)}</small></div><span>Order preserved</span></div>`);
+  });
+  imagePlan.innerHTML = rows.length ? rows.join("") : `<p class="plan-empty">No images selected.</p>`;
 }
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  const plan = chooseImagePlan();
-  build(plan);
+  const schema = buildSchema();
+  output.value = buildHtml(schema);
+  jsonOutput.value = JSON.stringify(schema, null, 2);
+  document.getElementById("resultTitle").textContent = schema.title;
+  document.getElementById("resultMeta").textContent = `${schema.category} · ${schema.read_time}`;
+  empty.hidden = true;
+  result.hidden = false;
+  renderPlan(schema);
 });
 
 document.getElementById("copyBtn").addEventListener("click", async () => {
@@ -330,7 +273,6 @@ document.getElementById("sampleBtn").addEventListener("click", () => {
   category.value = "bible-faith";
   readTime.value = "5 min read";
   dek.value = "When the road ahead feels uncertain, faith can remind us that Jesus is still near.";
-  cover.value = "/images/articles/finding-hope-when-life-feels-impossible.jpg";
   verseReference.value = "Psalm 34:18";
   verseText.value = "The Lord is close to the brokenhearted and saves those who are crushed in spirit.";
   body.value = `There are seasons when tomorrow feels difficult to imagine. In those moments, even a small reminder of hope can change the way we see the road ahead.
@@ -341,3 +283,6 @@ Sometimes the first step is simply to stop, breathe, and remember that we do not
 
 Faith does not promise an easy road. It gives us a reason to keep walking it. Whatever today holds, we can choose to place our trust in Jesus one step at a time.`;
 });
+
+renderCoverPreview();
+renderArticleImages();
