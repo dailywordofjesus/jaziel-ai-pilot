@@ -12,6 +12,8 @@ on:
         required: true
         type: boolean
         default: false
+  repository_dispatch:
+    types: [jaziel_ai_build]
 
 permissions:
   contents: write
@@ -31,33 +33,63 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Resolve draft path and publish mode
+        id: inputs
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_DRAFT: ${{ github.event.client_payload.draft_file }}
+          MANUAL_DRAFT: ${{ inputs.draft_file }}
+          DISPATCH_PUBLISH: ${{ github.event.client_payload.publish }}
+          MANUAL_PUBLISH: ${{ inputs.publish }}
+        run: |
+          if [ "$EVENT_NAME" = "repository_dispatch" ]; then
+            echo "draft_file=${DISPATCH_DRAFT:-content/drafts/current.json}" >> "$GITHUB_OUTPUT"
+            echo "publish=${DISPATCH_PUBLISH:-false}" >> "$GITHUB_OUTPUT"
+          else
+            echo "draft_file=${MANUAL_DRAFT:-content/drafts/current.json}" >> "$GITHUB_OUTPUT"
+            echo "publish=${MANUAL_PUBLISH:-false}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run Gemini AI Writer
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          DRAFT_FILE: ${{ inputs.draft_file }}
-        run: python scripts/ai_writer.py
+          GEMINI_MODEL: gemini-3.8-flash
+          GEMINI_FALLBACK_MODEL: gemini-3.7-flash
+          DRAFT_FILE: ${{ steps.inputs.outputs.draft_file }}
+        run: |
+          set -euo pipefail
+          test -n "${GEMINI_API_KEY:-}" || { echo 'GEMINI_API_KEY secret is missing.'; exit 1; }
+          test -f "$DRAFT_FILE" || { echo "Draft not found: $DRAFT_FILE"; exit 1; }
+          mkdir -p content/articles generated/articles
+          python scripts/ai_writer.py --input "$DRAFT_FILE" --output content/articles/ai-test.json
 
-      - name: Upload generated article as artifact
+      - name: Validate Schema v1
+        run: python scripts/validate.py
+
+      - name: Generate HTML
+        run: python scripts/generate.py
+
+      - name: Verify generated HTML
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f generated/articles/ai-test/index.html
+          if grep -nE '\{\{[^}]+\}\}' generated/articles/ai-test/index.html; then
+            echo 'Unresolved template placeholders found.'
+            exit 1
+          fi
+
+      - name: Upload Gemini result
         uses: actions/upload-artifact@v4
         with:
           name: jaziel-ai-result
           path: |
-            content/generated/**
-            content/schema/**
-            content/drafts/**
-          if-no-files-found: warn
-
-      - name: Commit generated draft for review
-        if: ${{ inputs.publish == false }}
-        run: |
-          git config user.name "jaziel-ai-pilot[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add content/generated content/schema content/drafts || true
-          git diff --cached --quiet || git commit -m "AI: generate Jaziel article draft"
-          git push
+            content/articles/ai-test.json
+            generated/articles/ai-test/index.html
+          if-no-files-found: error
 
       - name: Publish to Jaziel
-        if: ${{ inputs.publish == true }}
+        if: ${{ steps.inputs.outputs.publish == 'true' }}
         env:
           JAZIEL_PUBLISH_TOKEN: ${{ secrets.JAZIEL_PUBLISH_TOKEN }}
         run: python scripts/publish.py --apply
