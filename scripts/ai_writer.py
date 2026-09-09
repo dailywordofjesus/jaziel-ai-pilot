@@ -117,20 +117,49 @@ def build_prompt(draft: dict) -> str:
     supplied_verse = draft.get("verse_reference", "").strip()
     supplied_text = draft.get("verse_text", "").strip()
     verse_instruction = (
-        "The draft supplies a Bible verse. Preserve its reference and wording exactly; do not replace it."
-        if supplied_verse and supplied_text
-        else "If the draft clearly names a Bible verse, use that verse. Otherwise choose one fitting Bible verse. Do not invent a reference."
+        "The draft supplies a Bible verse. Translate the Bible reference into standard English book naming "
+        "(for example, 'Mazmur 34:18' becomes 'Psalm 34:18') and provide the verse text in natural English. "
+        "Do not preserve Indonesian wording in the final output. Do not change the chapter and verse numbers, "
+        "and do not invent or alter the meaning of the verse."
+        if supplied_verse or supplied_text
+        else "If the draft clearly names a Bible verse, use that verse with its standard English book name and "
+        "natural English verse text. Otherwise choose one fitting Bible verse. Do not invent a reference."
     )
 
     return f"""
 You are the AI Writer for Jaziel, a Christian publication for an English-speaking audience.
 
-The user supplies an Indonesian draft. Rewrite it into polished, natural English suitable for a thoughtful Christian article.
-Preserve the factual story, names, dates, numbers, and meaning. Do not invent new factual events.
-Translate the title into natural English when appropriate.
-Create a strong but honest description and dek for SEO/social sharing.
-Use a warm, hopeful, biblical tone without sensationalism.
-{verse_instruction}
+The user supplies an Indonesian draft. Convert the complete editorial content into polished, natural English suitable for a thoughtful Christian article.
+
+LANGUAGE REQUIREMENT — VERY IMPORTANT:
+- The final JSON must be written in English.
+- Translate ALL user-provided Indonesian editorial text into English.
+- This includes the title, description, dek, intro, section headings, section paragraphs, Bible verse reference/text, closing, keywords, and tags.
+- Do not leave Indonesian words, sentences, headings, or Bible book names in the final output unless a proper name genuinely must remain unchanged.
+- Do not translate personal names, brand names, or factual names unnecessarily.
+- Do not output explanations outside the requested JSON.
+
+CONTENT REQUIREMENTS:
+- Preserve the factual story, names, dates, numbers, and meaning.
+- Do not invent new factual events, quotes, claims, or details.
+- Translate the title into natural English.
+- Create a strong but honest English description and dek for SEO/social sharing.
+- Use a warm, hopeful, biblical tone without sensationalism.
+- Keep the article faithful to the supplied draft.
+- {verse_instruction}
+
+BIBLE VERSE REQUIREMENT:
+- When a verse is supplied, preserve its exact chapter and verse numbers.
+- Use the standard English Bible book name in the reference.
+- Provide natural English wording for the verse.
+- Do not retain the Indonesian verse wording.
+- Do not invent a Bible reference.
+- Do not change the theological meaning of the supplied verse.
+
+OUTPUT QUALITY CHECK:
+Before returning the JSON, silently check every generated string and array item for Indonesian language.
+If any Indonesian remains in editorial content, translate it into English before returning the JSON.
+Return only valid JSON matching the supplied response schema.
 
 IMPORTANT IMAGE RULE:
 Images are selected by the user. Do not choose, reorder, remove, or generate images.
