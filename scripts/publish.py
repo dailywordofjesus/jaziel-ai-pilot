@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish validated generated articles to the separate Jaziel repository.
+"""Publish validated generated articles and their selected images to Jaziel.
 
 This module is intentionally conservative: it only prepares a publication plan
 unless --apply is explicitly supplied. GitHub credentials are never stored in
@@ -17,26 +17,77 @@ from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED = ROOT / "generated" / "articles"
+CONTENT = ROOT / "content"
 CONFIG = ROOT / "config.json"
+
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"}
+TEXT_EXTENSIONS = {".html", ".css", ".js", ".json", ".xml", ".txt"}
 
 
 def load_config() -> dict:
     return json.loads(CONFIG.read_text(encoding="utf-8"))
 
 
+def _normalise_repo_path(src: str) -> str:
+    """Convert a web-style /content/... image path to a repo-relative path."""
+    path = str(src or "").strip().replace("\\", "/")
+    path = path.split("?", 1)[0].split("#", 1)[0]
+    if path.startswith("/"):
+        path = path[1:]
+    return path
+
+
+def _selected_image_paths() -> set[str]:
+    """Return only image files referenced by the current generated article."""
+    article_path = CONTENT / "articles" / "ai-test.json"
+    if not article_path.exists():
+        return set()
+
+    data = json.loads(article_path.read_text(encoding="utf-8"))
+    sources: set[str] = set()
+
+    cover = data.get("cover") or {}
+    if cover.get("src"):
+        sources.add(_normalise_repo_path(cover["src"]))
+
+    for image in data.get("images") or []:
+        if isinstance(image, dict) and image.get("src"):
+            sources.add(_normalise_repo_path(image["src"]))
+
+    return {path for path in sources if Path(path).suffix.lower() in IMAGE_EXTENSIONS}
+
+
 def files_to_publish() -> list[tuple[str, bytes]]:
-    if not GENERATED.exists():
-        return []
-    files = []
-    for path in sorted(GENERATED.rglob("*")):
-        if path.is_file() and path.suffix.lower() in {".html", ".css", ".js", ".json", ".xml", ".txt"}:
-            rel = path.relative_to(GENERATED).as_posix()
-            files.append((rel, path.read_bytes()))
+    """Collect generated text plus the images selected for this article."""
+    files: list[tuple[str, bytes]] = []
+
+    if GENERATED.exists():
+        for path in sorted(GENERATED.rglob("*")):
+            if path.is_file() and path.suffix.lower() in TEXT_EXTENSIONS:
+                rel = path.relative_to(GENERATED).as_posix()
+                files.append((f"__GENERATED__/{rel}", path.read_bytes()))
+
+    for repo_path in sorted(_selected_image_paths()):
+        path = ROOT / repo_path
+        if not path.is_file():
+            raise SystemExit(f"Selected article image not found in Pilot repository: {repo_path}")
+        files.append((repo_path, path.read_bytes()))
+
     return files
 
 
+def destination_for(source: str, site_subdir: str) -> str:
+    if source.startswith("__GENERATED__/"):
+        rel = source.removeprefix("__GENERATED__/")
+        return f"{site_subdir.rstrip('/')}/{rel}"
+    return source
+
+
 def build_plan(files: list[tuple[str, bytes]], site_subdir: str) -> list[dict]:
-    return [{"source": rel, "destination": f"{site_subdir.rstrip('/')}/{rel}"} for rel, _ in files]
+    return [
+        {"source": source, "destination": destination_for(source, site_subdir)}
+        for source, _ in files
+    ]
 
 
 def github_json(url: str, token: str, method: str = "GET", payload: dict | None = None) -> dict:
@@ -64,13 +115,14 @@ def publish(files: list[tuple[str, bytes]], owner: str, repo: str, branch: str, 
     base_tree = commit["tree"]["sha"]
 
     tree_elements = []
-    for rel, data in files:
+    for source, data in files:
+        destination = destination_for(source, site_subdir)
         blob = github_json(f"{api}/git/blobs", token, "POST", {
             "content": base64.b64encode(data).decode("ascii"),
             "encoding": "base64",
         })
         tree_elements.append({
-            "path": f"{site_subdir.rstrip('/')}/{rel}",
+            "path": destination,
             "mode": "100644",
             "type": "blob",
             "sha": blob["sha"],
@@ -81,7 +133,7 @@ def publish(files: list[tuple[str, bytes]], owner: str, repo: str, branch: str, 
         "tree": tree_elements,
     })
     new_commit = github_json(f"{api}/git/commits", token, "POST", {
-        "message": f"Publish Jaziel articles ({len(files)} files)",
+        "message": f"Publish Jaziel article and images ({len(files)} files)",
         "tree": tree["sha"],
         "parents": [parent_sha],
     })
