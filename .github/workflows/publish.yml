@@ -12,11 +12,14 @@ on:
     branches: [main]
     paths:
       - 'content/articles/**'
+      - 'content/drafts/**'
       - 'schemas/**'
       - 'templates/article.html'
+      - 'scripts/ai_writer.py'
       - 'scripts/generate.py'
       - 'scripts/validate.py'
       - 'scripts/publish.py'
+      - 'requirements.txt'
       - 'config.json'
 
 permissions:
@@ -37,6 +40,20 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Run Gemini AI Writer test draft
+        if: ${{ github.event_name == 'push' && hashFiles('content/drafts/*.json') != '' }}
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: gemini-3.8-flash
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${GEMINI_API_KEY:-}" || { echo 'GEMINI_API_KEY secret is missing.'; exit 1; }
+          mkdir -p content/articles generated/ai-test
+          draft="$(find content/drafts -maxdepth 1 -type f -name '*.json' | sort | head -n 1)"
+          python scripts/ai_writer.py --input "$draft" --output content/articles/ai-test.json
+          cp content/articles/ai-test.json generated/ai-test/ai-test.json
+
       - name: Validate articles
         run: python scripts/validate.py
 
@@ -52,6 +69,16 @@ jobs:
             echo 'Unresolved template placeholders found.'
             exit 1
           fi
+
+      - name: Upload AI test output
+        if: ${{ github.event_name == 'push' && hashFiles('content/drafts/*.json') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: jaziel-ai-test-output
+          path: |
+            content/articles/ai-test.json
+            generated/articles/ai-test/index.html
+          if-no-files-found: error
 
       - name: Publish to Jaziel
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish == true }}
