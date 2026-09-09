@@ -1,3 +1,1 @@
-// Set this to the deployed Cloudflare Worker URL.
-// Example: https://jaziel-ai-bridge.example.workers.dev
-window.JAZIEL_BRIDGE_URL = "";
+window.JAZIEL_BRIDGE_URL = "https://jaziel-pilot-bridge.michaeljitmau98.workers.dev";
