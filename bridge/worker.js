@@ -3,10 +3,18 @@ const API_VERSION = "2026-03-10";
 const DEFAULT_REPO = "dailywordofjesus/jaziel-ai-pilot";
 const DEFAULT_BRANCH = "main";
 
+function allowedOrigins(value) {
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function corsHeaders(origin, allowedOrigin) {
-  const allowed = allowedOrigin === "*" || origin === allowedOrigin;
+  const origins = allowedOrigins(allowedOrigin);
+  const allowed = origins.includes("*") || origins.includes(origin);
   return {
-    "Access-Control-Allow-Origin": allowed ? origin : allowedOrigin,
+    "Access-Control-Allow-Origin": allowed ? origin : (origins[0] || ""),
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Vary": "Origin"
@@ -75,13 +83,14 @@ function bytesToBase64(bytes) {
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
-    const allowedOrigin = env.ALLOWED_ORIGIN || "https://dailywordofjesus.github.io";
+    const allowedOrigin = env.ALLOWED_ORIGIN || "https://dailywordofjesus.github.io,https://wordofjesus.github.io";
+    const origins = allowedOrigins(allowedOrigin);
 
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders(origin, allowedOrigin) });
     }
     if (request.method !== "POST") return json({ error: "POST only" }, 405, origin, allowedOrigin);
-    if (allowedOrigin !== "*" && origin !== allowedOrigin) return json({ error: "Origin not allowed" }, 403, origin, allowedOrigin);
+    if (!origins.includes("*") && !origins.includes(origin)) return json({ error: "Origin not allowed" }, 403, origin, allowedOrigin);
     if (!env.GITHUB_TOKEN) return json({ error: "Bridge is missing GITHUB_TOKEN." }, 500, origin, allowedOrigin);
 
     try {
