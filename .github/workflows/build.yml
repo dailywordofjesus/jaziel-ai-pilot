@@ -1,0 +1,56 @@
+name: Jaziel Build Check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/**'
+      - 'schemas/**'
+      - 'templates/**'
+      - 'scripts/**'
+      - 'config.json'
+      - 'requirements.txt'
+      - '.github/workflows/build.yml'
+  pull_request:
+    paths:
+      - 'content/**'
+      - 'schemas/**'
+      - 'templates/**'
+      - 'scripts/**'
+      - 'config.json'
+      - 'requirements.txt'
+      - '.github/workflows/build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Validate articles
+        run: python scripts/validate.py
+
+      - name: Build articles
+        run: python scripts/generate.py
+
+      - name: Verify generated HTML
+        run: |
+          test -n "$(find generated/articles -name index.html -type f -print -quit)"
+          if grep -R "{{[A-Z_]*}}" generated/articles --include='*.html'; then
+            echo 'Unresolved template placeholders found.'
+            exit 1
+          fi
