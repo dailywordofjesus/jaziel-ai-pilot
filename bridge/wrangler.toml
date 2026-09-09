@@ -5,7 +5,7 @@ compatibility_date = "2026-09-07"
 [vars]
 GITHUB_REPO = "dailywordofjesus/jaziel-ai-pilot"
 GITHUB_BRANCH = "main"
-ALLOWED_ORIGIN = "https://dailywordofjesus.github.io,https://wordofjesus.github.io"
+ALLOWED_ORIGIN = "https://wordofjesus.github.io"
 
 [secrets]
 required = ["GITHUB_TOKEN"]
