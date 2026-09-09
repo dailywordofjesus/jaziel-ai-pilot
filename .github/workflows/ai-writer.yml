@@ -1,0 +1,63 @@
+name: Jaziel AI Writer
+
+on:
+  workflow_dispatch:
+    inputs:
+      draft_file:
+        description: "Path to draft JSON in the repository"
+        required: true
+        default: "content/drafts/current.json"
+      publish:
+        description: "Publish generated article to Jaziel"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  ai-writer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Pilot
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Gemini AI Writer
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DRAFT_FILE: ${{ inputs.draft_file }}
+        run: python scripts/ai_writer.py
+
+      - name: Upload generated article as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jaziel-ai-result
+          path: |
+            content/generated/**
+            content/schema/**
+            content/drafts/**
+          if-no-files-found: warn
+
+      - name: Commit generated draft for review
+        if: ${{ inputs.publish == false }}
+        run: |
+          git config user.name "jaziel-ai-pilot[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/generated content/schema content/drafts || true
+          git diff --cached --quiet || git commit -m "AI: generate Jaziel article draft"
+          git push
+
+      - name: Publish to Jaziel
+        if: ${{ inputs.publish == true }}
+        env:
+          JAZIEL_PUBLISH_TOKEN: ${{ secrets.JAZIEL_PUBLISH_TOKEN }}
+        run: python scripts/publish.py --apply
