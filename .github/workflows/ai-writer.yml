@@ -73,7 +73,9 @@ jobs:
 
           mkdir -p content/articles generated/articles
 
-          python scripts/ai_writer.py             --input "$DRAFT_FILE"             --output content/articles/ai-test.json
+          python scripts/ai_writer.py \
+            --input "$DRAFT_FILE" \
+            --output content/articles/ai-test.json
 
       - name: Validate Schema v1
         run: python scripts/validate.py
@@ -137,6 +139,42 @@ jobs:
           fi
 
           echo "Generated HTML verification passed."
+
+      - name: Verify selected article images
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path(".")
+          article_path = Path("content/articles/ai-test.json")
+          data = json.loads(article_path.read_text(encoding="utf-8"))
+
+          sources = []
+          cover = data.get("cover") or {}
+          if cover.get("src"):
+              sources.append(cover["src"])
+
+          for image in data.get("images") or []:
+              if isinstance(image, dict) and image.get("src"):
+                  sources.append(image["src"])
+
+          if not sources:
+              print("No article images selected.")
+              raise SystemExit(0)
+
+          for source in sources:
+              repo_path = source.split("?", 1)[0].split("#", 1)[0].lstrip("/")
+              path = root / repo_path
+              if not path.is_file():
+                  raise SystemExit(f"Selected article image not found: {repo_path}")
+              print(f"Image OK: {repo_path} ({path.stat().st_size} bytes)")
+
+          print(f"Verified {len(sources)} selected article image(s).")
+          PY
 
       - name: Upload Gemini result
         uses: actions/upload-artifact@v4
