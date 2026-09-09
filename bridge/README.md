@@ -31,7 +31,8 @@ npx wrangler deploy
 Use a GitHub fine-grained personal access token scoped only to `dailywordofjesus/jaziel-ai-pilot` with:
 
 - Contents: Read and write
-- Actions: Read and write
+
+Contents write is sufficient because the bridge uploads files and sends a `repository_dispatch` event.
 
 The token is stored only as the Cloudflare Worker secret `GITHUB_TOKEN`.
 
@@ -41,4 +42,10 @@ After deployment, copy the Worker URL. It will look similar to:
 
 `https://jaziel-ai-bridge.<your-subdomain>.workers.dev`
 
-Then set that URL in the Pilot configuration as `window.JAZIEL_BRIDGE_URL`.
+Then edit `scripts/bridge-config.js` and set:
+
+```js
+window.JAZIEL_BRIDGE_URL = "https://your-worker-url.workers.dev";
+```
+
+The Pilot will then send the article and photos to the bridge when **Build article** is clicked.
